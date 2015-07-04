@@ -9,6 +9,7 @@ import Signal
 import Graphics.Element exposing (middle, container, Element)
 import Text
 import Maybe
+import Timer exposing (timer)
 
 type Control = Next | Back | NoOp
 
@@ -35,8 +36,8 @@ type alias Deck = List Card
 suits : List Suit
 suits = [Hearts, Spades, Clubs, Diamonds]
 
-values : List Rank
-values = ["2", "3", "4", "5", "6", "7", "8", "9", "10", "J", "Q", "K", "A"]
+rank : List Rank
+rank = ["2", "3", "4", "5", "6", "7", "8", "9", "10", "J", "Q", "K", "A"]
 
 replicate : Int -> a -> List a
 replicate n a =
@@ -44,7 +45,7 @@ replicate n a =
 
 -- no applicative :(
 makeDeck : Deck
-makeDeck = List.concatMap (\v -> List.map (\s -> (s, v)) suits) values
+makeDeck = List.concatMap (\v -> List.map (\s -> (s, v)) suits) rank
 
 suitSymbol : Suit -> String
 suitSymbol suit =
@@ -65,8 +66,8 @@ showCard card =
         [ span [class "number"] [text value]
         , span [] [text symbol]
         ]
-      , span [class "suit top_center"] [text symbol]
-      , span [class "suit bottom_center"] [text symbol]
+      --, span [class "suit top_center"] [text symbol]
+      --, span [class "suit bottom_center"] [text symbol]
       , div [class "corner bottom"]
         [ span [class "number"] [text value]
         , span [] [text symbol]
@@ -77,8 +78,8 @@ showDeck : Deck -> Html.Html
 showDeck deck =
   div [class "cards"] (List.map showCard deck)
 
-model : Model
-model =
+initialModel : Model
+initialModel =
   let deck = makeDeck
   in
     { prevCards = []
@@ -123,12 +124,19 @@ control keys model =
 input : Signal Keys
 input = Keyboard.arrows
 
-view : Model -> Element
-view model =
-  let card = div [class "cards"] [(showCard model.card)]
-  in container 500 500 middle (toElement 400 400 card)
+view : Timer.Model -> Model -> Html
+view time model =
+  div
+    [class "game"]
+    [ div [class "timer"] [Timer.view time]
+    , showCard model.card
+    ]
+
+-- manage the model of our application over time
+state : Signal Model
+state =
+  Signal.foldp update initialModel input
 
 main =
-  --Signal.map (centered << Text.fromString << toString) (Signal.foldp update model input)
-  Signal.map view (Signal.foldp update model input)
+  Signal.map2 view timer state
 
