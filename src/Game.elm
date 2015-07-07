@@ -24,20 +24,20 @@ type alias Model =
 type alias Keys = { x: Int, y: Int }
 
 showCard : Card -> Html.Html
-showCard card =
-  let (suit, value) = card
+showCard (suit, r) =
+  let rank = showRank r
       symbol = suitSymbol suit
       suitName = suit |> toString |> String.toLower
   in
     div [class ("card " ++ suitName)]
       [ div [class "corner top"]
-        [ span [class "number"] [text value]
+        [ span [class "number"] [text rank]
         , span [] [text symbol]
         ]
       --, span [class "suit top_center"] [text symbol]
       --, span [class "suit bottom_center"] [text symbol]
       , div [class "corner bottom"]
-        [ span [class "number"] [text value]
+        [ span [class "number"] [text rank]
         , span [] [text symbol]
         ]
       ]
@@ -52,15 +52,13 @@ initialModel =
   in
     { prevCards = []
     , nextCards = drop 1 deck
-    , card = head deck |> Maybe.withDefault (Hearts, "Ace")
+    , card = head deck |> Maybe.withDefault (Hearts, Ace)
     , control = NoOp
     }
 
 update : Keys -> Model -> Model
 update keys model =
-  model
-    |> control keys
-    |> move
+  model |> control keys |> move
 
 move : Model -> Model
 move model =
