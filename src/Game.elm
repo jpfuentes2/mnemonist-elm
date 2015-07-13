@@ -18,6 +18,8 @@ type alias Model =
   { prevCards: Cards
   , nextCards : Cards
   , card : Card
+  , position: Int
+  , numCards: Int
   , control : Control
   }
 
@@ -54,28 +56,37 @@ initialModel =
     , nextCards = drop 1 deck
     , card = head deck |> Maybe.withDefault (Hearts, Ace)
     , control = NoOp
+    , position = 0
+    , numCards = List.length deck
     }
 
 update : Keys -> Model -> Model
 update keys model =
   model |> control keys |> move
 
+incr : number -> number
+incr n = n + 1
+
+decr : number -> number
+decr n = n - 1
+
 move : Model -> Model
 move model =
   let
-    noop = (model.card, model.prevCards, model.nextCards)
-    (card, p, n) =
+    noop = (model.card, identity, model.prevCards, model.nextCards)
+    (card, position, p, n) =
       case (model.control, head model.prevCards, head model.nextCards) of
         (NoOp, _, _) -> noop
         (Back, Nothing, _) -> noop
         (Next, _, Nothing) -> noop
-        (Back, Just p, _) -> (p, drop 1 model.prevCards, model.card :: model.nextCards)
-        (Next, _, Just n) -> (n, model.card :: model.prevCards, drop 1 model.nextCards)
+        (Back, Just p, _) -> (p, decr, drop 1 model.prevCards, model.card :: model.nextCards)
+        (Next, _, Just n) -> (n, incr, model.card :: model.prevCards, drop 1 model.nextCards)
 
   in { model |
         card <- card,
         prevCards <- p,
-        nextCards <- n
+        nextCards <- n,
+        position <- position model.position
      }
 
 control : Keys -> Model -> Model
