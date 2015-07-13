@@ -20,7 +20,7 @@ type Rank = Two
 
 type alias Card = (Suit, Rank)
 
-type alias Deck = List Card
+type alias Cards = List Card
 
 suits : List Suit
 suits = [Hearts, Spades, Clubs, Diamonds]
@@ -45,7 +45,7 @@ showRank rank =
   --if n <= 0 then [] else a :: (replicate (n-1) a)
 
 -- no applicative :(
-makeDeck : Deck
+makeDeck : Cards
 makeDeck = List.concatMap (\v -> List.map (\s -> (s, v)) suits) <| List.map fst ranks
 
 suitSymbol : Suit -> String

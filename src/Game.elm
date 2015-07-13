@@ -15,8 +15,8 @@ import PlayingCards exposing (..)
 type Control = Next | Back | NoOp
 
 type alias Model =
-  { prevCards: Deck
-  , nextCards : Deck
+  { prevCards: Cards
+  , nextCards : Cards
   , card : Card
   , control : Control
   }
@@ -42,9 +42,9 @@ showCard (suit, r) =
         ]
       ]
 
-showDeck : Deck -> Html.Html
-showDeck deck =
-  div [class "cards"] (List.map showCard deck)
+showCards : Cards -> Html.Html
+showCards cards =
+  div [class "cards"] (List.map showCard cards)
 
 initialModel : Model
 initialModel =
