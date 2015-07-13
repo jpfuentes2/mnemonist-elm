@@ -1,5 +1,5 @@
 import String
-import List exposing (head, drop)
+import Array exposing (Array)
 import Set
 import Time exposing (every, second)
 import Html exposing (..)
@@ -15,11 +15,10 @@ import PlayingCards exposing (..)
 type Control = Next | Back | NoOp
 
 type alias Model =
-  { prevCards: Cards
-  , nextCards : Cards
-  , card : Card
-  , position: Int
+  { position: Int
+  , cards : Array Card
   , numCards: Int
+  , card : Maybe Card
   , control : Control
   }
 
@@ -50,43 +49,38 @@ showCards cards =
 
 initialModel : Model
 initialModel =
-  let deck = makeDeck
+  let deck = makeDeck |> Array.fromList
   in
-    { prevCards = []
-    , nextCards = drop 1 deck
-    , card = head deck |> Maybe.withDefault (Hearts, Ace)
+    { position = 0
+    , cards = deck
+    , numCards = Array.length deck
+    , card = Array.get 0 deck
     , control = NoOp
-    , position = 0
-    , numCards = List.length deck
     }
 
 update : Keys -> Model -> Model
 update keys model =
   model |> control keys |> move
 
-incr : number -> number
-incr n = n + 1
+succ : number -> number
+succ n = n + 1
 
-decr : number -> number
-decr n = n - 1
+pred : number -> number
+pred n = n - 1
 
 move : Model -> Model
 move model =
   let
-    noop = (model.card, identity, model.prevCards, model.nextCards)
-    (card, position, p, n) =
-      case (model.control, head model.prevCards, head model.nextCards) of
-        (NoOp, _, _) -> noop
-        (Back, Nothing, _) -> noop
-        (Next, _, Nothing) -> noop
-        (Back, Just p, _) -> (p, decr, drop 1 model.prevCards, model.card :: model.nextCards)
-        (Next, _, Just n) -> (n, incr, model.card :: model.prevCards, drop 1 model.nextCards)
+    makeMove =
+      case model.control of
+        NoOp -> identity
+        Back -> if model.position - 1 < 0 then identity else pred
+        Next -> if model.position + 1 == model.numCards then identity else succ
+    position = makeMove model.position
 
   in { model |
-        card <- card,
-        prevCards <- p,
-        nextCards <- n,
-        position <- position model.position
+        position <- position,
+        card <- Array.get position model.cards
      }
 
 control : Keys -> Model -> Model
@@ -103,11 +97,21 @@ input = Keyboard.arrows
 
 view : Timer.Model -> Model -> Html
 view time model =
-  div
-    [class "game"]
-    [ div [class "timer"] [Timer.view time]
-    , showCard model.card
-    ]
+  let card = case model.card of
+    Just c -> showCard c
+    Nothing -> div [class "card blank"] []
+  in
+    div
+      [class "game"]
+      [ div [class "timer"] [Timer.view time]
+      , card
+      , div [] [model |> toString |> Html.text]
+      -- , div [class "position"] [
+      ]
+
+--position : Model -> Html
+--position model =
+  --let totals = List.map List.sum [model.prevCards, model.nextCards]
 
 -- manage the model of our application over time
 state : Signal Model
