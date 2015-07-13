@@ -96,22 +96,20 @@ input : Signal Keys
 input = Keyboard.arrows
 
 view : Timer.Model -> Model -> Html
-view time model =
-  let card = case model.card of
-    Just c -> showCard c
-    Nothing -> div [class "card blank"] []
+view timer model =
+  let
+      card = case model.card of
+        Just c -> showCard c
+        Nothing -> div [class "card blank"] []
+      position = (toString <| model.position + 1) ++ " / " ++ (toString model.numCards)
   in
     div
       [class "game"]
-      [ div [class "timer"] [Timer.view time]
+      [ div [class "timer"] [Timer.view timer]
       , card
+      , div [class "position"] [Html.text position]
       , div [] [model |> toString |> Html.text]
-      -- , div [class "position"] [
       ]
-
---position : Model -> Html
---position model =
-  --let totals = List.map List.sum [model.prevCards, model.nextCards]
 
 -- manage the model of our application over time
 state : Signal Model
