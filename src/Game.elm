@@ -5,14 +5,12 @@ import Time exposing (every, second)
 import Html exposing (..)
 import Html.Attributes exposing (class)
 import Keyboard
-import Signal
-import Graphics.Element exposing (middle, container, Element)
+import Graphics.Element exposing (middle, container, down, flow, Element)
 import Text
-import Maybe
 import Timer exposing (timer)
 import PlayingCards exposing (..)
 
-type Control = Next | Back | NoOp
+type Control = Next | NoOp
 
 type alias Model =
   { position: Int
@@ -25,10 +23,10 @@ type alias Model =
 type alias Keys = { x: Int, y: Int }
 
 showCard : Card -> Html.Html
-showCard (suit, r) =
-  let rank = showRank r
-      symbol = suitSymbol suit
-      suitName = suit |> toString |> String.toLower
+showCard card =
+  let rank = showRank card.rank
+      symbol = suitSymbol card.suit
+      suitName = card.suit |> toString |> String.toLower
   in
     div [class ("card " ++ suitName)]
       [ div [class "corner top"]
@@ -74,7 +72,6 @@ move model =
     makeMove =
       case model.control of
         NoOp -> identity
-        Back -> if model.position - 1 < 0 then identity else pred
         Next -> if model.position + 1 == model.numCards then identity else succ
     position = makeMove model.position
 
@@ -85,12 +82,7 @@ move model =
 
 control : Keys -> Model -> Model
 control keys model =
-  { model |
-      control <-
-        if  | keys.x < 0 -> Back
-            | keys.x > 0 -> Next
-            | otherwise  -> NoOp
-  }
+  { model | control <- if keys.x > 0 then Next else NoOp }
 
 input : Signal Keys
 input = Keyboard.arrows
@@ -104,12 +96,12 @@ view timer model =
       position = (toString <| model.position + 1) ++ " / " ++ (toString model.numCards)
   in
     div
-      [class "game"]
+      [class "game container"]
       [ div [class "timer"] [Timer.view timer]
       , card
       , div [class "position"] [Html.text position]
-      , div [] [model |> toString |> Html.text]
-      ]
+      -- , div [] [model |> toString |> Html.text]
+      ]-- |> down |> flow
 
 -- manage the model of our application over time
 state : Signal Model

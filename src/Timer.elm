@@ -7,7 +7,7 @@ import Signal
 import String
 import Time exposing (every, millisecond, second, minute, Time)
 
-type alias Model = { minutes : Int , seconds : Int }
+type alias Model = { minutes : Int, seconds : Int }
 
 model : Model
 model = { minutes = 0, seconds = 0 }

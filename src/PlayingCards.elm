@@ -18,7 +18,10 @@ type Rank = Two
           | King
           | Ace
 
-type alias Card = (Suit, Rank)
+type alias Card =
+  { suit : Suit
+  , rank : Rank
+  }
 
 type alias Cards = List Card
 
@@ -46,7 +49,7 @@ showRank rank =
 
 -- no applicative :(
 makeDeck : Cards
-makeDeck = List.concatMap (\v -> List.map (\s -> (s, v)) suits) <| List.map fst ranks
+makeDeck = List.concatMap (\r -> List.map (\s -> { suit = s, rank = r }) suits) <| List.map fst ranks
 
 suitSymbol : Suit -> String
 suitSymbol suit =

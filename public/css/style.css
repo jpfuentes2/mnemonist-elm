@@ -1,3 +1,17 @@
-.cards {
-  font-size: 14px;
+.game {
+}
+
+.cards.recall .card {
+  width: 3em;
+  margin: 0px;
+  height: 11.2em;
+}
+
+.cards.recall .card .corner {
+  position: relative;
+  left: 0px;
+}
+
+.cards.recall .card .corner.top span {
+  text-align: center;
 }
